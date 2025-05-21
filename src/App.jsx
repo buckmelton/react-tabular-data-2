@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
-import './App.css'
+import { useEffect, useState } from 'react';
+import Pagination from './components/Pagination.jsx';
+import './App.css';
 
 export default function App() {
   const [users, setUsers] = useState([]);
@@ -7,6 +8,9 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredUsers, setFilteredUsers] = useState([]);
+  const [sortDirection, setSortDirection] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [usersPerPage, setUsersPerPage] = useState(8);
 
   useEffect(() => {
     setLoading(true);
@@ -46,6 +50,15 @@ export default function App() {
     setSearchTerm(e.target.value);
   };
 
+  const handleSortByLastName = (e) => {
+    console.log('foo');
+    setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+  };
+
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+
   if (error) return <p>Error loading customers.  Please try again later.</p>;
 
   return (
@@ -63,13 +76,13 @@ export default function App() {
           <tr>
             <th>ID</th>
             <th>First Name</th>
-            <th>Last Name</th>
+            <th onClick={handleSortByLastName}>Last Name</th>
             <th>Email</th>
             <th>Company</th>
           </tr>
         </thead>
         <tbody>
-          {!loading && filteredUsers.map(user => (
+          {!loading && currentUsers.map(user => (
             <tr key={user.id}>
               <td>{user.id}</td>
               <td>{user.firstName}</td>
@@ -80,6 +93,12 @@ export default function App() {
           ))}
         </tbody>
       </table>
+      <Pagination
+        usersPerPage={usersPerPage}
+        totalUsers={users.length}
+        setCurrentPage={setCurrentPage}
+        currentPage={currentPage}
+      />
     </div>
   )
 }
