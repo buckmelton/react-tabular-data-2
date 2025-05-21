@@ -43,8 +43,18 @@ export default function App() {
       );
     }
 
+    if (sortDirection) {
+      results = results.sort((userA, userB) => {
+        const lastNameA = userA.lastName.toLowerCase();
+        const lastNameB = userB.lastName.toLowerCase();
+        if (lastNameA < lastNameB) return sortDirection === 'asc' ? -1 : 1;
+        if (lastNameB < lastNameA) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
     setFilteredUsers(results);
-  }, [searchTerm, users]);
+  }, [searchTerm, users, sortDirection]);
 
   const handleChangeSearchInput = (e) => {
     setSearchTerm(e.target.value);
