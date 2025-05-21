@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 
-function App() {
+export default function App() {
   const [users, setUsers] = useState([]);
   const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredUsers, setFilteredUsers] = useState([]);
 
   useEffect(() => {
+    setLoading(true);
     const fetchUsers = async () => {
       try {
         const response = await fetch('https://dummyjson.com/users');
@@ -18,17 +22,42 @@ function App() {
         setUsers(resData.users);
       } catch(error) {
         setError(true);
+      } finally {
+        setLoading(false);
       }
     }
 
     fetchUsers();
   }, []);
 
-  console.log('users: ', users);
+  useEffect(() => {
+    let results = users;
+
+    if (searchTerm) {
+      results = results.filter(user => 
+        user.lastName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    setFilteredUsers(results);
+  }, [searchTerm, users]);
+
+  const handleChangeSearchInput = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  if (error) return <p>Error loading customers.  Please try again later.</p>;
 
   return (
     <div>
-      <h1>Henlopen Outfitters Customer List</h1>
+      <h1>Users</h1>
+      <input
+        type="text"
+        placeholder="Search on last name"
+        value={searchTerm}
+        onChange={handleChangeSearchInput}
+      />
+      {loading && <p>Loading customers ...</p>}
       <table border="1" cellPadding="10" cellSpacing="0">
         <thead>
           <tr>
@@ -40,7 +69,7 @@ function App() {
           </tr>
         </thead>
         <tbody>
-          {users.map(user => (
+          {!loading && filteredUsers.map(user => (
             <tr key={user.id}>
               <td>{user.id}</td>
               <td>{user.firstName}</td>
@@ -54,5 +83,3 @@ function App() {
     </div>
   )
 }
-
-export default App
